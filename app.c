@@ -4,7 +4,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-
 int count_lines_file(const char *filename)
 {
     FILE *fp = fopen(filename, "r");
@@ -23,8 +22,7 @@ int count_lines_file(const char *filename)
     return lines;
 }
 
-
-void run_dir(const char *path) {
+void run_dir(const char *path, long long *total_lines) {
   DIR *dir = opendir(path);
   if (!dir) {
     perror(path);
@@ -46,10 +44,11 @@ void run_dir(const char *path) {
 
     if (S_ISDIR(st.st_mode)) {
       printf("%s\n", fullpath);
-      run_dir(fullpath); // i do not like recursion, TODO: fix
+      run_dir(fullpath, total_lines); // i do not like recursion, TODO: fix
     } else if (S_ISREG(st.st_mode)) {
-      printf("%s\n", fullpath);
-      // count_file_lines(fullpath);
+      int loc = count_lines_file(fullpath);
+      printf("  %s: %d\n",fullpath, loc);
+      *total_lines += loc;
     }
 
     free(fullpath);
@@ -59,11 +58,9 @@ void run_dir(const char *path) {
 }
 
 int main(int argc, char **argv) {
-  // const char *path = (argc > 1) ? argv[1] : ".";
-
-  int hi = count_lines_file("./test.txt");
-  printf("%d\n", hi); // should 8
-
-  // run_dir(path);
+  const char *path = (argc > 1) ? argv[1] : ".";
+  long long tot;
+  run_dir(path, &tot);
+  printf("tot: %lld\n", tot);
   return 0;
 }

@@ -4,6 +4,26 @@
 #include <string.h>
 #include <sys/stat.h>
 
+
+int count_lines_file(const char *filename)
+{
+    FILE *fp = fopen(filename, "r");
+    if (fp == NULL)
+        return 0;
+
+    int ch;
+    int lines = 0;
+
+    while ((ch = fgetc(fp)) != EOF) {
+        if (ch == '\n')
+            lines++;
+    }
+
+    fclose(fp);
+    return lines;
+}
+
+
 void run_dir(const char *path) {
   DIR *dir = opendir(path);
   if (!dir) {
@@ -39,8 +59,11 @@ void run_dir(const char *path) {
 }
 
 int main(int argc, char **argv) {
-  const char *path = (argc > 1) ? argv[1] : ".";
+  // const char *path = (argc > 1) ? argv[1] : ".";
 
-  run_dir(path);
+  int hi = count_lines_file("./test.txt");
+  printf("%d\n", hi); // should 8
+
+  // run_dir(path);
   return 0;
 }

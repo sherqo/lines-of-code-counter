@@ -1,17 +1,18 @@
 #include <stdio.h>
-#include <dirent.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <limits.h>
 
-int count_lines_file(const char *filename)
+long long count_lines_file(const char *filename)
 {
     FILE *fp = fopen(filename, "r");
     if (fp == NULL)
         return 0;
 
     int ch;
-    int lines = 0;
+    long long lines = 0;
 
     while ((ch = fgetc(fp)) != EOF) {
         if (ch == '\n')
@@ -46,9 +47,17 @@ void run_dir(const char *path, long long *total_lines) {
       printf("%s\n", fullpath);
       run_dir(fullpath, total_lines); // i do not like recursion, TODO: fix
     } else if (S_ISREG(st.st_mode)) {
-      int loc = count_lines_file(fullpath);
-      printf("  %s: %d\n",fullpath, loc);
-      *total_lines += loc;
+      long long loc = count_lines_file(fullpath);
+      printf("  %s: %lld\n",fullpath, loc);
+
+      if(*total_lines > LLONG_MAX - loc) {
+        fprintf(stderr, "overflow detected. exiting.\n");
+        free(fullpath);
+        closedir(dir);
+        exit(EXIT_FAILURE);
+      } else {
+        *total_lines += loc;
+      }
     }
 
     free(fullpath);
@@ -59,7 +68,7 @@ void run_dir(const char *path, long long *total_lines) {
 
 int main(int argc, char **argv) {
   const char *path = (argc > 1) ? argv[1] : ".";
-  long long tot;
+  long long tot = 0;
   run_dir(path, &tot);
   printf("tot: %lld\n", tot);
   return 0;

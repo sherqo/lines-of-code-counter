@@ -11,13 +11,15 @@ long long count_lines_file(const char *filename)
     if (fp == NULL)
         return 0;
 
-    int ch;
+    int ch, last_ch = '\n';
     long long lines = 0;
 
     while ((ch = fgetc(fp)) != EOF) {
-        if (ch == '\n')
-            lines++;
+        if (ch == '\n')lines++;
+        last_ch = ch;
     }
+
+    if (last_ch != '\n') lines++;
 
     fclose(fp);
     return lines;

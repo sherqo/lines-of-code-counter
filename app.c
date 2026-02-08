@@ -69,9 +69,26 @@ void run_dir(const char *path, long long *total_lines) {
 }
 
 int main(int argc, char **argv) {
-  const char *path = (argc > 1) ? argv[1] : ".";
+  int files_only = 0;
+  const char *path = ".";
+
+  for (int i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "-f")) {
+      files_only = 1;
+    } else {
+      path = argv[i];
+    }
+  }
+
   long long tot = 0;
-  run_dir(path, &tot);
-  printf("tot: %lld\n", tot);
+
+  if (files_only) {
+    tot = count_lines_file(path);
+    printf("%s: %lld\n", path, tot);
+  } else {
+    run_dir(path, &tot);
+    printf("tot: %lld\n", tot);
+  }
+
   return 0;
 }
